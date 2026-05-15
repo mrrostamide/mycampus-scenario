@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The MyCampus Café Incident</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f4f4f8;--bg2:#ffffff;--bg3:#eeeef4;--border:#dcdce8;--border2:#c0c0d4;
+    --text:#18182a;--text2:#58587a;--text3:#9898b8;
+    --amber:#c47a00;--amber-bg:#fff8ea;--amber-bdr:#f0d08a;
+    --green:#14804a;--green-bg:#edfaf3;--green-bdr:#86dbb0;
+    --red:#c42b2b;--red-bg:#fff0f0;--red-bdr:#f0aaaa;
+    --blue:#1d4ed8;--blue-bg:#eff4ff;--blue-bdr:#93c5fd;
+    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;--r:10px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 5rem;line-height:1.7}
+  .page{max-width:800px;margin:0 auto;padding:2.5rem 1rem 0}
+
+  /* ── TOP NAV ── */
+  .topnav{background:#18182a;padding:.55rem 1.5rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  .topnav-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#48486a;margin-right:.5rem}
+  .tnav-link{font-family:var(--mono);font-size:11px;font-weight:500;padding:.35rem .85rem;border-radius:20px;text-decoration:none;transition:all .15s;border:1px solid transparent;display:flex;align-items:center;gap:5px}
+  .tnav-link.current{background:#2a2a42;color:#e0e0f0;border-color:#3a3a58;cursor:default}
+  .tnav-link.other{color:#6060a0;border-color:#2a2a40}
+  .tnav-link.other:hover{background:#2a2a42;color:#c0c0e0;border-color:#4040600}
+
+  .hdr{border-bottom:2px solid var(--border);padding-bottom:1.75rem;margin-bottom:2.5rem}
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.7rem;display:flex;align-items:center;gap:8px}
+  .eyebrow::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;animation:blink 2.2s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}55%{opacity:.2}}
+  h1{font-family:var(--mono);font-size:clamp(1.4rem,3.5vw,2rem);font-weight:600;color:var(--text);line-height:1.2;letter-spacing:-.02em}
+  .hdr-sub{font-size:14px;color:var(--text2);margin-top:.6rem}
+
+  .scenario{background:var(--bg2);border:1px solid var(--border);border-left:4px solid var(--amber);border-radius:var(--r);padding:1.5rem 1.75rem;margin-bottom:2.5rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+  .slabel{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:.9rem}
+  .scenario p{font-size:15px;color:var(--text);line-height:1.85;margin-bottom:.85rem}
+  .scenario p:last-child{margin-bottom:0}
+  .scenario strong{color:var(--text);font-weight:600}
+  .chip{font-family:var(--mono);font-size:11px;background:var(--blue-bg);border:1px solid var(--blue-bdr);padding:1px 7px;border-radius:4px;color:var(--blue);white-space:nowrap}
+
+  .qlabel{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
+  .questions{margin-bottom:2.5rem}
+  .qb{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.7rem;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:border-color .2s,box-shadow .2s}
+  .qb:hover,.qb.open{border-color:var(--border2);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+  .qh{display:flex;align-items:flex-start;gap:14px;padding:1rem 1.25rem;cursor:pointer;user-select:none;transition:background .15s}
+  .qh:hover{background:var(--bg)}
+  .qnum{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;flex-shrink:0;margin-top:3px;letter-spacing:.04em}
+  .qnum.atk{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bdr)}
+  .qnum.chn{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bdr)}
+  .qnum.dev{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr)}
+  .qnum.usr{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bdr)}
+  .qnum.bon{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+  .qtxt{font-size:14px;font-weight:500;color:var(--text);flex:1;line-height:1.55}
+  .qarr{font-size:16px;color:var(--text3);flex-shrink:0;margin-top:3px;transition:transform .25s;line-height:1}
+  .qb.open .qarr{transform:rotate(180deg)}
+  .qbody{display:none;border-top:1px solid var(--border)}
+  .qb.open .qbody{display:block}
+
+  .gate{padding:1.2rem 1.5rem;background:var(--bg);animation:fin .2s ease}
+  @keyframes fin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+  .gate-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:.6rem;display:flex;align-items:center;gap:6px}
+  .gate-label::before{content:'🔐';font-size:12px}
+  .gate-q{font-size:13px;font-weight:500;color:var(--text);margin-bottom:.9rem;line-height:1.5}
+
+  .mc-opts{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:.5rem}
+  .mc-btn{font-family:var(--mono);font-size:12px;padding:5px 14px;border:1px solid var(--border2);border-radius:20px;background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s}
+  .mc-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--text3)}
+  .mc-btn.wrong{background:var(--red-bg);border-color:var(--red-bdr);color:var(--red);animation:shake .3s ease}
+  .mc-btn.correct{background:var(--green-bg);border-color:var(--green-bdr);color:var(--green)}
+
+  .blank-row{display:flex;gap:8px;align-items:center;margin-bottom:.5rem}
+  .blank-in{font-family:var(--mono);font-size:13px;padding:5px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);outline:none;width:160px;transition:border-color .2s;text-transform:uppercase}
+  .blank-in:focus{border-color:var(--blue)}
+  .blank-in.wrong{border-color:var(--red);animation:shake .3s ease}
+  .blank-in.correct{border-color:var(--green);background:var(--green-bg)}
+  .blank-btn{font-family:var(--mono);font-size:11px;padding:5px 14px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text2);cursor:pointer;font-weight:600;letter-spacing:.04em;transition:all .15s}
+  .blank-btn:hover{background:var(--border);color:var(--text)}
+
+  .tf-opts{display:flex;gap:8px;margin-bottom:.5rem}
+  .tf-btn{font-family:var(--mono);font-size:12px;padding:5px 22px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text2);cursor:pointer;font-weight:600;transition:all .15s}
+  .tf-btn:hover{background:var(--bg3);color:var(--text)}
+  .tf-btn.wrong{background:var(--red-bg);border-color:var(--red-bdr);color:var(--red);animation:shake .3s ease}
+  .tf-btn.correct{background:var(--green-bg);border-color:var(--green-bdr);color:var(--green)}
+
+  .cipher-display{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--amber);letter-spacing:.2em;margin-bottom:.75rem;background:var(--amber-bg);border:1px solid var(--amber-bdr);padding:.6rem 1rem;border-radius:8px;display:inline-block}
+
+  .gate-fb{font-family:var(--mono);font-size:11px;min-height:15px;margin-top:4px}
+  .gate-fb.err{color:var(--red)}
+  .gate-fb.ok{color:var(--green)}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+  .ponder-wrap{display:none;animation:fin .3s ease}
+  .ponder-wrap.show{display:block}
+  .ponder{padding:1rem 1.5rem 1.2rem;background:var(--bg2);border-top:1px dashed var(--border)}
+  .ponder-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:.55rem;display:flex;align-items:center;gap:5px}
+  .ponder-label::before{content:'✓';font-size:11px}
+  .ponder p{font-size:13px;color:var(--text2);font-style:italic;line-height:1.8;padding-left:.9rem;border-left:2px solid var(--green-bdr)}
+
+  .topics-wrap{border:1px solid var(--border);border-radius:var(--r);margin-bottom:2rem;background:var(--bg2);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .topics-hdr{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;cursor:pointer;user-select:none;transition:background .15s}
+  .topics-hdr:hover{background:var(--bg)}
+  .topics-title{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);font-weight:500}
+  .topics-arr{font-size:14px;color:var(--text3);transition:transform .25s}
+  .topics-wrap.open .topics-arr{transform:rotate(180deg)}
+  .topics-body{display:none;padding:.75rem 1.25rem 1rem;border-top:1px solid var(--border);flex-wrap:wrap;gap:5px}
+  .topics-wrap.open .topics-body{display:flex}
+
+  .lock-wrap{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:2rem;background:var(--bg2);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .lock-hdr{background:var(--bg3);padding:1rem 1.4rem;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border)}
+  .licon{width:36px;height:36px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all .35s}
+  .licon.open{background:var(--green-bg);border-color:var(--green-bdr)}
+  .lock-title{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text)}
+  .lock-sub{font-size:12px;color:var(--text2);margin-top:1px}
+  .lock-body{padding:1.4rem}
+
+  .challenge{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1.2rem 1.4rem;margin-bottom:1.25rem;text-align:center}
+  .clabel{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:.8rem}
+  .cstring{font-family:var(--mono);font-size:clamp(12px,2vw,15px);font-weight:600;color:var(--amber);letter-spacing:.07em;word-break:break-all;line-height:1.6}
+
+  .pw-row{display:flex;gap:8px;margin-bottom:.6rem}
+  .pwin{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.65rem 1rem;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;transition:border-color .2s}
+  .pwin:focus{border-color:var(--blue)}
+  .pwin.err{border-color:var(--red);animation:shake .3s ease}
+  .pbtn{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:.65rem 1.25rem;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text);cursor:pointer;letter-spacing:.04em;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+  .pbtn:hover{background:var(--border);color:var(--text)}
+  .pmsg{font-family:var(--mono);font-size:11px;color:var(--red);display:none;min-height:16px}
+  .pmsg.show{display:block}
+
+  .answers{display:none;animation:fin .35s ease}
+  .answers.show{display:block}
+  .adivider{border:none;border-top:1px solid var(--border);margin:1.4rem 0}
+  .ablock{border:1px solid var(--border);border-radius:var(--r);margin-bottom:.7rem;overflow:hidden}
+  .ahead{background:var(--bg3);padding:.75rem 1.25rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .atag{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  .atag.r{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bdr)}
+  .atag.g{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr)}
+  .atag.b{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bdr)}
+  .atag.a{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bdr)}
+  .atag.n{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+  .atitle{font-size:13px;font-weight:500;color:var(--text)}
+  .abody{background:var(--bg2);padding:1.1rem 1.25rem;border-top:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.85}
+  .abody strong{color:var(--text);font-weight:600}
+  .abody .mc{font-family:var(--mono);font-size:11px;background:var(--blue-bg);border:1px solid var(--blue-bdr);padding:1px 6px;border-radius:3px;color:var(--blue);white-space:nowrap}
+  .alist{list-style:none;padding:0;margin-top:.6rem}
+  .alist li{padding:.35rem 0 .35rem 1.4rem;position:relative;border-bottom:1px solid var(--bg3)}
+  .alist li:last-child{border-bottom:none}
+  .alist li::before{content:'›';position:absolute;left:0;color:var(--green);font-family:var(--mono);font-size:14px;top:.3rem}
+  .otags{margin-top:.85rem;display:flex;flex-wrap:wrap;gap:5px}
+  .otag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+  .ftag{font-family:var(--mono);font-size:10px;padding:2px 9px;border-radius:4px;background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+
+  ::-webkit-scrollbar{width:5px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <span class="topnav-label">MyCampus Scenario</span>
+  <a class="tnav-link current" href="index.html">📋 Scenario Worksheet</a>
+  <a class="tnav-link other" href="mycampus_vulnerable.html">🖥 Live Simulation</a>
+</nav>
+
+<div class="page">
+
+  <div class="hdr">
+    <div class="eyebrow">Security Scenario &nbsp;·&nbsp; Classroom Exercise</div>
+    <h1>The MyCampus<br>Café Incident</h1>
+    <div class="hdr-sub">Read the scenario. Solve the mini-challenge under each question to unlock your thinking prompt.</div>
+  </div>
+
+  <div class="scenario">
+    <div class="slabel">The Scenario</div>
+    <p>Sarah is a university student. On a Tuesday afternoon she visits <strong>CaféBean</strong>, connects to the free Wi-Fi, and opens her laptop. She navigates to <span class="chip">http://mycampus.com</span> to check her semester grades. She types her username and password, spends a few minutes on her profile, then closes the laptop and leaves.</p>
+    <p>A week later she tries to log in again — <strong>her password doesn't work</strong>. She clicks "Forgot password" and waits for a reset email that never arrives. Digging through old notifications, she finds one she almost missed: <strong>"Your account email address has been changed."</strong> She never made that change. Her account now shows a recovery email she does not recognise.</p>
+    <p>She installed nothing. She visited no suspicious links. She only checked her grades. <strong>How did this happen?</strong></p>
+  </div>
+
+  <div class="qlabel">Discussion Questions</div>
+  <div class="questions">
+
+    <!-- Q1 -->
+    <div class="qb" id="q1">
+      <div class="qh" onclick="toggleQ('q1')">
+        <span class="qnum atk">Q1 — Attack</span>
+        <span class="qtxt">What attack was most likely conducted here? How did the attacker position themselves to intercept Sarah's data without her noticing?</span>
+        <span class="qarr">&#8964;</span>
+      </div>
+      <div class="qbody">
+        <div class="gate" id="gate-q1">
+          <div class="gate-label">Unlock the thinking prompt</div>
+          <div class="gate-q">On a local network, a device needs to find the MAC address of another device from its IP. Which protocol handles this?</div>
+          <div class="mc-opts">
+            <button class="mc-btn" onclick="mcCheck('q1',this,false)">DNS</button>
+            <button class="mc-btn" onclick="mcCheck('q1',this,true)">ARP</button>
+            <button class="mc-btn" onclick="mcCheck('q1',this,false)">DHCP</button>
+            <button class="mc-btn" onclick="mcCheck('q1',this,false)">ICMP</button>
+          </div>
+          <div class="gate-fb" id="fb-q1"></div>
+        </div>
+        <div class="ponder-wrap" id="ponder-q1">
+          <div class="ponder">
+            <div class="ponder-label">Thinking prompt</div>
+            <p>Sarah was on a <em>shared</em> café LAN — every device is reachable by every other. Can ARP table entries be forged? Could the attacker have been physically in the café? What does <span class="chip">http://</span> expose that <span class="chip">https://</span> would have protected?</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="qb" id="q2">
+      <div class="qh" onclick="toggleQ('q2')">
+        <span class="qnum chn">Q2 — The Chain</span>
+        <span class="qtxt">The attacker never cracked or guessed Sarah's password. So how did they gain full control of her account a week later?</span>
+        <span class="qarr">&#8964;</span>
+      </div>
+      <div class="qbody">
+        <div class="gate" id="gate-q2">
+          <div class="gate-label">Unlock the thinking prompt</div>
+          <div class="gate-q">After login, your browser stores a small piece of session data that gets sent automatically with every request. What is it called? (one word)</div>
+          <div class="blank-row">
+            <input class="blank-in" id="blank-q2" type="text" placeholder="_ _ _ _ _ _" maxlength="12"
+              onkeydown="if(event.key==='Enter')blankCheck('q2','cookie')">
+            <button class="blank-btn" onclick="blankCheck('q2','cookie')">Check</button>
+          </div>
+          <div class="gate-fb" id="fb-q2"></div>
+        </div>
+        <div class="ponder-wrap" id="ponder-q2">
+          <div class="ponder">
+            <div class="ponder-label">Thinking prompt</div>
+            <p>After login, the server issues a session token stored in your browser. On a plain HTTP connection, where does that token travel — and can someone on the same network read it? If an attacker copies it into their own browser, how does the server distinguish them from the real Sarah?</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="qb" id="q3">
+      <div class="qh" onclick="toggleQ('q3')">
+        <span class="qnum dev">Q3 — Developer</span>
+        <span class="qtxt">You are the developer of mycampus.com. What should you have built to prevent this? Name at least three concrete controls.</span>
+        <span class="qarr">&#8964;</span>
+      </div>
+      <div class="qbody">
+        <div class="gate" id="gate-q3">
+          <div class="gate-label">Unlock the thinking prompt</div>
+          <div class="gate-q">This word has been encoded with a Caesar cipher (shift of 3). Decode it — your answer is the single most important thing missing from mycampus.com.</div>
+          <div><div class="cipher-display">KWWSV</div></div>
+          <div class="blank-row">
+            <input class="blank-in" id="blank-q3" type="text" placeholder="_ _ _ _ _" maxlength="8"
+              onkeydown="if(event.key==='Enter')blankCheck('q3','https')">
+            <button class="blank-btn" onclick="blankCheck('q3','https')">Check</button>
+          </div>
+          <div class="gate-fb" id="fb-q3"></div>
+        </div>
+        <div class="ponder-wrap" id="ponder-q3">
+          <div class="ponder">
+            <div class="ponder-label">Thinking prompt</div>
+            <p>Start at the transport layer — what makes HTTP dangerous on a shared network? Are there flags you can set on a session cookie that restrict when it is transmitted? What should be required before a user is allowed to change their recovery email? What should happen to all active sessions the instant a password or email is changed?</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="qb" id="q4">
+      <div class="qh" onclick="toggleQ('q4')">
+        <span class="qnum usr">Q4 — User</span>
+        <span class="qtxt">Sarah had no control over the website's code. What could she personally have done — before, during, and after the café — to protect herself?</span>
+        <span class="qarr">&#8964;</span>
+      </div>
+      <div class="qbody">
+        <div class="gate" id="gate-q4">
+          <div class="gate-label">Unlock the thinking prompt</div>
+          <div class="gate-q">True or False — Closing the browser tab is the same as logging out of a website.</div>
+          <div class="tf-opts">
+            <button class="tf-btn" onclick="tfCheck('q4',this,false)">True</button>
+            <button class="tf-btn" onclick="tfCheck('q4',this,true)">False</button>
+          </div>
+          <div class="gate-fb" id="fb-q4"></div>
+        </div>
+        <div class="ponder-wrap" id="ponder-q4">
+          <div class="ponder">
+            <div class="ponder-label">Thinking prompt</div>
+            <p>Public Wi-Fi is untrusted. What tool encrypts your traffic end-to-end regardless of what the website does? What should you verify in the address bar before typing credentials? What account feature makes a stolen session cookie significantly less powerful on its own? And now that you know closing the tab is not logging out — what is?</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q5 Bonus — open debate, no gate -->
+    <div class="qb" id="q5">
+      <div class="qh" onclick="toggleQ('q5')">
+        <span class="qnum bon">Bonus</span>
+        <span class="qtxt">If the developer had fixed everything on their end, could this attack still have worked? Who bears more responsibility — Sarah or the developer?</span>
+        <span class="qarr">&#8964;</span>
+      </div>
+      <div class="qbody">
+        <div class="ponder" style="border-top:none">
+          <div class="ponder-label" style="color:var(--text3)">Open debate</div>
+          <p>No single correct answer. Consider — which party had the greater technical ability to prevent this? Is it reasonable to expect all users to understand the difference between <span class="chip">http://</span> and <span class="chip">https://</span>? Does the principle of "secure by default" shift responsibility toward developers? Are there cases where user negligence is significant enough to override developer failure?</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ANSWER KEY -->
+  <div class="lock-wrap">
+    <div class="lock-hdr">
+      <div class="licon" id="licon">&#128274;</div>
+      <div>
+        <div class="lock-title">Answer Key</div>
+        <div class="lock-sub" id="lsub">Solve the challenge below to unlock</div>
+      </div>
+    </div>
+    <div class="lock-body">
+      <div class="challenge" id="challenge-block">
+        <div class="clabel">Decode to unlock</div>
+        <div class="cstring">6332567a63326c76626d6870616d466a61773d3d</div>
+      </div>
+      <div class="pw-row" id="pw-row">
+        <input class="pwin" type="password" id="pwin" placeholder="Enter the decoded value…"
+          onkeydown="if(event.key==='Enter')checkPw()" autocomplete="off" spellcheck="false">
+        <button class="pbtn" onclick="checkPw()">Unlock</button>
+      </div>
+      <div class="pmsg" id="pmsg">Incorrect — keep decoding</div>
+
+      <div class="answers" id="answers">
+        <hr class="adivider">
+
+        <div class="ablock">
+          <div class="ahead"><span class="atag r">Q1 — Attack</span><span class="atitle">ARP poisoning → Man-in-the-Middle → Session hijacking</span></div>
+          <div class="abody">
+            <strong>What happened:</strong> The attacker was physically on the same café LAN. They broadcast forged ARP reply packets to both Sarah's laptop and the router, poisoning both ARP caches. All of Sarah's traffic was delivered to the attacker first; with IP forwarding enabled they relayed it onward so everything appeared normal to Sarah.<br><br>
+            Because <span class="mc">http://mycampus.com</span> carries no encryption, every byte was readable in plaintext. The attacker captured Sarah's <strong>login credentials</strong> and — critically — the <strong>session cookie</strong> issued by the server after login.
+            <div class="otags"><span class="otag">ARP Poisoning</span><span class="otag">Man-in-the-Middle</span><span class="otag">OWASP A02 — Cryptographic Failures</span><span class="otag">WSTG-CRYP-03</span></div>
+          </div>
+        </div>
+
+        <div class="ablock">
+          <div class="ahead"><span class="atag r">Q2 — The Chain</span><span class="atitle">The session cookie was enough — no password required</span></div>
+          <div class="abody">
+            <strong>How sessions work:</strong> After login the server creates a session and issues the browser a cookie — a token meaning "whoever holds this is authenticated as Sarah." The browser attaches it to every subsequent request automatically.<br><br>
+            On a plain HTTP connection that cookie travels in cleartext. The attacker read it, injected it into their own browser via developer tools, and reloaded the page. The server saw a valid session token and treated the attacker as Sarah. The actual password was never needed again. The attacker then changed the recovery email and triggered a password reset to their own inbox — locking Sarah out entirely.
+            <div class="otags"><span class="otag">Session Hijacking</span><span class="otag">Cookie Theft</span><span class="otag">OWASP A07 — Identification &amp; Auth Failures</span><span class="otag">WSTG-SESS-02</span></div>
+          </div>
+        </div>
+
+        <div class="ablock">
+          <div class="ahead"><span class="atag g">Q3 — Developer Fixes</span><span class="atitle">Six controls that would have stopped or contained the attack</span></div>
+          <div class="abody">
+            <ul class="alist">
+              <li><strong>Deploy HTTPS (TLS).</strong> Encrypts the entire connection. An intercepted session cookie is unreadable ciphertext. The highest-impact fix — free certificates available via Let's Encrypt.</li>
+              <li><strong>Enforce HSTS.</strong> The <span class="mc">Strict-Transport-Security</span> header tells browsers to always upgrade to HTTPS for this domain — even if the user types <span class="mc">http://</span>.</li>
+              <li><strong>Set Secure, HttpOnly, and SameSite cookie flags.</strong> <span class="mc">Secure</span> blocks cookie transmission over HTTP. <span class="mc">HttpOnly</span> blocks JavaScript from reading it. <span class="mc">SameSite=Strict</span> blocks CSRF.</li>
+              <li><strong>Require current password before sensitive account changes.</strong> Any change to recovery email or password must demand re-entry of the existing password. A stolen session alone cannot complete the takeover.</li>
+              <li><strong>Invalidate all sessions on account changes.</strong> When a password or email is updated, every active session token must be revoked server-side immediately.</li>
+              <li><strong>Alert the previous address on account changes.</strong> An instant email — "your recovery email was changed, was this you?" — gives the real user a window to act before being locked out.</li>
+            </ul>
+            <div class="otags"><span class="otag">OWASP A02</span><span class="otag">OWASP A04</span><span class="otag">OWASP A05</span><span class="otag">OWASP A07</span><span class="otag">WSTG-CRYP-03</span><span class="otag">WSTG-SESS-02</span><span class="otag">WSTG-ATHN-06</span><span class="otag">WSTG-CONF-07</span></div>
+          </div>
+        </div>
+
+        <div class="ablock">
+          <div class="ahead"><span class="atag b">Q4 — User Precautions</span><span class="atitle">Five things Sarah could have done</span></div>
+          <div class="abody">
+            <ul class="alist">
+              <li><strong>Use a VPN on public Wi-Fi.</strong> Creates an encrypted tunnel from your device regardless of what the website does. Even with full ARP poisoning, the attacker intercepts only encrypted noise.</li>
+              <li><strong>Verify HTTPS before entering credentials.</strong> The padlock and <span class="mc">https://</span> confirm the connection is encrypted. On plain <span class="mc">http://</span>, never enter credentials on a shared network.</li>
+              <li><strong>Enable Two-Factor Authentication (2FA).</strong> A stolen session cookie alone cannot change sensitive settings if a second factor is required.</li>
+              <li><strong>Log out fully when done.</strong> A proper logout invalidates the session server-side. A stolen cookie for an invalidated session is worthless. Closing the browser tab is not logging out.</li>
+              <li><strong>Treat unexpected security emails as emergencies.</strong> The "your email was changed" notification was the last chance to recover the account. Acting immediately from a trusted network could have prevented the lockout.</li>
+            </ul>
+            <div class="otags"><span class="otag">VPN</span><span class="otag">HTTPS awareness</span><span class="otag">2FA / MFA</span><span class="otag">Session hygiene</span></div>
+          </div>
+        </div>
+
+        <div class="ablock">
+          <div class="ahead"><span class="atag n">Bonus — Responsibility</span><span class="atitle">One perspective on who bears more responsibility</span></div>
+          <div class="abody">
+            <strong>The developer bears primary responsibility.</strong> Deploying HTTPS would have made the ARP poisoning entirely useless — the attacker would have captured only ciphertext. Free TLS certificates and standard guidance have been available since 2016. Leaving a login portal on plain HTTP is a fundamental failure of secure design.<br><br>
+            Sarah's failure to use a VPN is a contributing factor — but it is unreasonable to expect every user to understand the security implications of <span class="mc">http://</span> versus <span class="mc">https://</span>. <strong>Secure by default</strong> is the developer's responsibility. User precautions are a second layer of defence — not a substitute for the first.<br><br>
+            <em>A system should be safe for users who know nothing about security — because most users are exactly that.</em>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPICS COVERED -->
+  <div class="topics-wrap" id="topics-wrap">
+    <div class="topics-hdr" onclick="toggleTopics()">
+      <span class="topics-title">Topics Covered</span>
+      <span class="topics-arr">&#8964;</span>
+    </div>
+    <div class="topics-body">
+      <span class="ftag">ARP Poisoning</span><span class="ftag">Man-in-the-Middle</span>
+      <span class="ftag">Session Hijacking</span><span class="ftag">OWASP Top 10 2021</span>
+      <span class="ftag">WSTG-CRYP-03</span><span class="ftag">WSTG-SESS-02</span>
+      <span class="ftag">WSTG-ATHN-06</span><span class="ftag">WSTG-CONF-07</span>
+      <span class="ftag">HTTPS / TLS</span><span class="ftag">HSTS</span>
+      <span class="ftag">Cookie Flags</span><span class="ftag">VPN</span><span class="ftag">2FA</span>
+    </div>
+  </div>
+
+</div>
+<script>
+  function toggleQ(id){document.getElementById(id).classList.toggle('open')}
+  function toggleTopics(){document.getElementById('topics-wrap').classList.toggle('open')}
+
+  function mcCheck(qid,btn,correct){
+    const opts=btn.closest('.mc-opts').querySelectorAll('.mc-btn');
+    opts.forEach(b=>{b.classList.remove('wrong','correct');b.disabled=false});
+    if(correct){
+      btn.classList.add('correct');
+      opts.forEach(b=>b.disabled=true);
+      setTimeout(()=>revealPonder(qid),600);
+    } else {
+      btn.classList.add('wrong');
+      setFb(qid,'Not quite — think about the Layer 2 address resolution protocol.','err');
+      setTimeout(()=>btn.classList.remove('wrong'),400);
+    }
+  }
+
+  function blankCheck(qid,answer){
+    const input=document.getElementById('blank-'+qid);
+    const val=input.value.trim().toLowerCase();
+    if(val===answer){
+      input.classList.add('correct');
+      input.disabled=true;
+      document.querySelector('#gate-'+qid+' .blank-btn').disabled=true;
+      setFb(qid,'','');
+      setTimeout(()=>revealPonder(qid),500);
+    } else {
+      input.classList.add('wrong');
+      const msgs={q2:'Not quite — think about what the browser stores after login.',q3:'Not quite — shift each letter back by 3 in the alphabet.'};
+      setFb(qid,msgs[qid]||'Try again.','err');
+      setTimeout(()=>input.classList.remove('wrong'),400);
+    }
+  }
+
+  function tfCheck(qid,btn,correct){
+    const opts=btn.closest('.tf-opts').querySelectorAll('.tf-btn');
+    opts.forEach(b=>{b.classList.remove('wrong','correct');b.disabled=false});
+    if(correct){
+      btn.classList.add('correct');
+      opts.forEach(b=>b.disabled=true);
+      setFb(qid,'Correct! Closing a tab leaves the server-side session alive.','ok');
+      setTimeout(()=>revealPonder(qid),700);
+    } else {
+      btn.classList.add('wrong');
+      setFb(qid,'Not quite — the server never knows you closed the tab.','err');
+      setTimeout(()=>btn.classList.remove('wrong'),400);
+    }
+  }
+
+  function setFb(qid,msg,cls){
+    const el=document.getElementById('fb-'+qid);
+    el.textContent=msg;
+    el.className='gate-fb'+(cls?' '+cls:'');
+  }
+
+  function revealPonder(qid){
+    const gate=document.getElementById('gate-'+qid);
+    const ponder=document.getElementById('ponder-'+qid);
+    if(gate)gate.style.display='none';
+    if(ponder)ponder.classList.add('show');
+  }
+
+  /* Answer key: hex → base64 → sessionhijack */
+  const PASS='sessionhijack';
+  function checkPw(){
+    const input=document.getElementById('pwin');
+    const msg=document.getElementById('pmsg');
+    if(input.value.trim().toLowerCase()===PASS){
+      document.getElementById('answers').classList.add('show');
+      msg.classList.remove('show');
+      document.getElementById('pw-row').style.display='none';
+      document.getElementById('challenge-block').style.display='none';
+      document.getElementById('licon').textContent='🔓';
+      document.getElementById('licon').classList.add('open');
+      document.getElementById('lsub').textContent='Unlocked';
+    } else {
+      input.classList.add('err');
+      msg.classList.add('show');
+      setTimeout(()=>input.classList.remove('err'),350);
+    }
+  }
+</script>
+</body>
+</html>
